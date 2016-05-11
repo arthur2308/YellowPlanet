@@ -7,3 +7,7 @@
 /build
 /captures
 modules.xml
+.idea/.name
+settings.gradle
+build.gradle
+.idea/vcs.xml
