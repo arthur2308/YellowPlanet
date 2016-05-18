@@ -44,7 +44,7 @@ public final class Storage {
         public static final int DATABASE_VERSION = 1;
         public static final String DATABASE_NAME = "DataStorage.db";
 
-        public StorageDbHelper(Context context) {
+        public StorageHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
@@ -52,10 +52,11 @@ public final class Storage {
             db.execSQL(SQL_CREATE_ENTRIES);
         }
 
-        public void onUpgrade(SQLiteDatabase db, int old, int new) {
+        public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
 
         }
 
 
     }
+
 }
