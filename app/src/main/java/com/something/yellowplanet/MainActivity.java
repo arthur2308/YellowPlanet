@@ -11,6 +11,8 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Storage.StorageHelper mainStorage;
+    private Storage.StorageHelper averages;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +28,11 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        Storage enclosing = new Storage();
+        mainStorage = enclosing.new StorageHelper(getBaseContext());
+        averages = enclosing.new StorageHelper(getBaseContext());
+
     }
 
     @Override
