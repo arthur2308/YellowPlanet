@@ -9,8 +9,13 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,7 +42,7 @@ import java.util.List;
     -ram
 "volts" = returns the data in volts instead of percent
     -battery
-"
+"[pid]" = returns the information for the pid passed. do NOT include square brackets, just pid
      */
 
  public class featureExtractor
@@ -48,6 +53,7 @@ import java.util.List;
     final private String networkOutName = "network out";
     final private String networkInName = "network in";
     final private String ramName = "ram";
+    final private String threadsName = "threads";
     final private String systemCallName = "system calls";
 
     /*-------------------ARGUMENT NAMES ------------------------------------*/
@@ -58,6 +64,9 @@ import java.util.List;
 
     final private String inUseArg = "in use";
     final private String freeArg = "free";
+    final private String defaultArg = "default";
+
+    final private String packetArg = "packets";
 
     //------------------------get feature------------------------------------
     //takes a feature from the feature list and returns the statistic
@@ -73,13 +82,15 @@ import java.util.List;
             case cpuName:
                 return(getCpuStatistic(args));
             case networkOutName:
-                return(getNetworkOutStatistics());
+                return(getNetworkOutStatistics(args));
             case networkInName:
-                return(getNetworkInStatistics());
+                return(getNetworkInStatistics(args));
             case ramName:
                 return(getRamStatistics(args));
             case systemCallName:
                 return(getSystemCallStatistics());
+            case threadsName:
+                return(getThreadStatistics(args, sender));
             default:
                 return(-1);
         }
@@ -128,12 +139,13 @@ import java.util.List;
         nice: niced processes executing in user mode
         system: processes executing in kernel mode
         idle: twiddling thumbs
-        iowait: waiting for I/O to complete
+        iowait: waiting for I/O to "complete
         irq: servicing interrupts
         softirq: servicing softirqs
          */
-        //TODO:IMPLEMENT CPU STATISTICS GETTER
-        RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
+        //TODO:IMPLEMENT CPU STATISTICS
+        RandomAccessFile reader;
+        reader = new RandomAccessFile("/proc/stat", "r");
         String cpuInfo = reader.readLine();
         String[] parts = cpuInfo.split(" ");
         Log.d("feature", "Full: " + cpuInfo);
@@ -166,16 +178,55 @@ import java.util.List;
         }
     }
 
-    private double getNetworkOutStatistics()
+
+    //---------------------------------get network out statistic-----------------------------------
+    //gets the ammount of network out traffic
+    //possible args:
+    //              "packets" - returns the number of packets sent out
+    //
+    //Default: returns the number of bytes sent out
+    private double getNetworkOutStatistics(String args) throws Exception
     {
-        //TODO:IMPLEMENT NETWORK OUT STATISTICS GETTER
-        return(-1);
+        //TODO:IMPLEMENT NETWORK OUT STATISTICS GETTE
+        String[] lineParts = getNetFile();
+        if(args.toLowerCase() == packetArg)
+        {
+            for(int i = 0; i < lineParts.length; i++)
+            {
+                Log.d("feature", "line part " + i + " :" + lineParts[i]);
+            }
+            Log.d("feature", "returning: " + lineParts[12]);
+            return(Integer.decode(lineParts[58]));
+        }
+        else
+        {
+            return(Integer.decode(lineParts[52]));
+        }
     }
 
-    private double getNetworkInStatistics()
+    //---------------------------------get network out statistic-----------------------------------
+    //gets the ammount of network in traffic
+    //possible args:
+    //              "packets" - returns the number of packets received
+    //
+    //Default: returns the number of bytes received
+    private double getNetworkInStatistics(String args) throws Exception
     {
         //TODO:IMLEMENT NETWORK IN STATISTICS GETTER
-        return(-1);
+        String[] lineParts = getNetFile();
+        if(args.toLowerCase() == packetArg)
+        {
+            for(int i = 0; i < lineParts.length; i++)
+            {
+                Log.d("feature", "line part " + i + " :" + lineParts[i]);
+            }
+            Log.d("feature", "returning: " + lineParts[12]);
+            return(Integer.decode(lineParts[11]));
+        }
+        else
+        {
+            return(Integer.decode(lineParts[5]));
+        }
     }
 
     @TargetApi(16)
@@ -221,6 +272,37 @@ import java.util.List;
         }
     }
 
+    /*------------------Get thread statistics-----------------------
+    *   Gets threads allocated from system
+    *   possible args:
+    *       "[pid]" - returns the threads created by the passed pid
+    *   Default: returns the total number of threads created from all pids
+    *      */
+    private double getThreadStatistics(String args, Activity sender) throws Exception
+    {
+        File f = new File("/proc/" + args + "/stat");
+        if(f.exists() && !f.isDirectory()) { //if valid pid passed as arg
+            RandomAccessFile reader = new RandomAccessFile("/proc/" + args + "/stat", "r");
+            String newLine = reader.readLine();
+            String[] parts = newLine.split(" ");
+            return(Double.parseDouble(parts[20]));
+        }
+        else if(args.toLowerCase() == defaultArg)
+        {
+            int[] allPids = getAllPids(sender);
+            double retVal = 0;
+            for(int i = 0; i < allPids.length; i++)
+            {
+                retVal += getThreadStatistics("" + allPids[i], sender) + 1;
+            }
+            return(retVal);
+        }
+        else
+        {
+            return(-1);
+        }
+    }
+
 
     private double getSystemCallStatistics()
     {
@@ -249,4 +331,43 @@ import java.util.List;
         }
         return (-1);
     }
+
+    /*---------------------get all pids-------------------------------------
+        function to return all currently running task pids
+        returns by means of short array
+     */
+    public int[] getAllPids(Activity context) throws Exception {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> pids = activityManager.getRunningServices(Integer.MAX_VALUE);
+        int processid = 0;
+        int[] retVal = new int[pids.size()];
+        Log.d("feature", "pid size: " + pids.size());
+        for (int i = 0; i < pids.size(); i++) {
+            ActivityManager.RunningServiceInfo info = pids.get(i);
+            retVal[i] = info.pid;
+            Log.d("feature", "pid: " + info.service);
+
+            return (retVal);
+        }
+        return(null);
+    }
+
+    /*-----------------get net file-----------------------------
+        private function for getting the proc/net file
+        returns the line for eth0 in array split by spaces
+     */
+    private String[] getNetFile() throws Exception
+    {
+        RandomAccessFile reader = new RandomAccessFile("/proc/net/dev", "r");
+        int lineNum = 0;
+        List<String> allLines = new ArrayList<String>();
+        String line = reader.readLine();
+        while(line != null)
+        {
+            allLines.add(line);
+            line = reader.readLine();
+        }
+        return(allLines.get(4).split(" "));
+    }
+
 }

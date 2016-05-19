@@ -1,5 +1,6 @@
 package com.something.yellowplanet;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -13,29 +14,30 @@ import java.security.*;
 import javax.crypto.*;
 
 
-
 public class MainActivity extends AppCompatActivity {
 
+    Activity toSend;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        toSend = this;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        featureExtractor featureExtract = new featureExtractor();
-        try {
-            double batteryLevel = featureExtract.getFeature("ram", "default", this);
-            Log.d("feature:", "" + batteryLevel);
-        }
-        catch(Exception e){
-            Log.d("Feature debug:",e.getMessage());
-        }
 
        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
+                    featureExtractor featureExtract = new featureExtractor();
+                    try {
+                        double batteryLevel = featureExtract.getFeature("network in", "default", toSend);
+                        Log.d("feature:", "" + batteryLevel);
+                    }
+                    catch(Exception e){
+                        Log.d("Feature debug:",e.getMessage());
+                    }
                     Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
