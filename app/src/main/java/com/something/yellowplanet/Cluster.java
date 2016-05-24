@@ -51,7 +51,8 @@ public class Cluster {
         System.out.println("[Cluster: " + id+"]");
         System.out.println("[Centroid: " + centroid + "]");
         System.out.println("[Points: \n");
-        for(Point p : points) {
+        for(Object o : points) {
+            Point p = (Point)o;
             System.out.println(p);
         }
         System.out.println("]");

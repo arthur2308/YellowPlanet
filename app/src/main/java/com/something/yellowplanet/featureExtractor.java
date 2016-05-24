@@ -70,6 +70,13 @@ public class featureExtractor
 
     private Context contextToUse;
 
+    /*----------------------old feature values---------------------*/
+    int previousNetworkIn = 0;
+    int previousNetworkout = 0;
+
+    int previousNetworkInPackets = 0;
+    int previousNetworkOutPackets = 0;
+
     public featureExtractor(Context newContext)
     {
         contextToUse = newContext;
@@ -193,11 +200,17 @@ public class featureExtractor
         String[] lineParts = getNetFile();
         if(args.toLowerCase() == packetArg)
         {
-            return(Integer.decode(lineParts[59]));
+            int newNetPackets = Integer.decode(lineParts[10]);
+            int retVal = newNetPackets - previousNetworkOutPackets;
+            previousNetworkOutPackets = newNetPackets;
+            return(retVal);
         }
         else
         {
-            return(Integer.decode(lineParts[53]));
+            int newNetOut = Integer.decode(lineParts[9]);
+            int retVal = newNetOut - previousNetworkout;
+            previousNetworkout = newNetOut;
+            return(retVal);
         }
     }
 
@@ -211,19 +224,19 @@ public class featureExtractor
     {
         //TODO:IMLEMENT NETWORK IN STATISTICS GETTER
         String[] lineParts = getNetFile();
-        /*
-        for(int i = 0; i < lineParts.length; i++)
-        {
-            Log.d("feature", "line part " + i + " :" + lineParts[i]);
-        }
-        */
         if(args.toLowerCase() == packetArg)
         {
-            return(Integer.decode(lineParts[12]));
+            int newNetPackets =  Integer.decode(lineParts[2]);
+            int retVal = newNetPackets - previousNetworkInPackets;
+            previousNetworkInPackets = newNetPackets;
+            return(retVal);
         }
         else
         {
-            return(Integer.decode(lineParts[6]));
+            int newNetIn = Integer.decode(lineParts[1]);
+            int retVal = newNetIn - previousNetworkIn;
+            previousNetworkIn = newNetIn;
+            return(retVal);
         }
     }
 
@@ -368,7 +381,14 @@ public class featureExtractor
             allLines.add(line);
             line = reader.readLine();
         }
-        return(allLines.get(4).split(" "));
+        String[] withExtra = allLines.get(4).split("\\s+"); //leaves empty string in spot 0 of area
+        String[] retVal = new String[withExtra.length - 1];
+        for(int i = 1; i < withExtra.length; i++)
+        {
+            retVal[i - 1] = withExtra[i];
+        }
+        return(retVal);
+        //return(retArray);
     }
 
 }

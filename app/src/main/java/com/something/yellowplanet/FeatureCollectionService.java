@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.io.Console;
@@ -24,8 +26,10 @@ public class FeatureCollectionService
     final int timerSeconds = 10000;
     private featureExtractor features;
     private Timer stopWatch;
+    private Context contextToUse;
     public FeatureCollectionService(Context newContext)
     {
+        contextToUse = newContext;
         features = new featureExtractor(newContext);
         stopWatch = new Timer("featureTimer");
     }
@@ -37,16 +41,18 @@ public class FeatureCollectionService
             @Override
             public void run() {
                 try {
-                    Log.d("feature", "");
+                    Log.d("feature", "FEATURE COLLECTION FOR: " + System.currentTimeMillis());
                     Map dataResults = getAllFeatures();
                     for(int i = 0; i < allFeatures[0].length; i++)
                     {
                         Log.d("feature ", "type: " + allFeatures[0][i] +" val: " + dataResults.get(allFeatures[0][i]));
+                        checkIfAnomolyDetected(allFeatures[0][i], (double)dataResults.get(allFeatures[0][i]));
                     }
                 }
                 catch (Exception e)
                 {
                     e.printStackTrace();
+                    Log.d("feature","reason: " + e.getMessage());
                 }
             }
         };
@@ -64,6 +70,20 @@ public class FeatureCollectionService
             retMap.put(featureName,featureVal);
         }
         return(retMap);
+    }
+
+    /*------------------check if anomoloy detected---------------------
+        checks if anomoly is detected
+        if detected, warning activity is launched
+     */
+    private void checkIfAnomolyDetected(String featureName, double featureVal)
+    {
+        if(featureName.equals("network in") && featureVal > 1000000)
+        {
+            Intent i = new Intent(contextToUse, WarningActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            contextToUse.startActivity(i);
+        }
     }
 
 

@@ -12,13 +12,9 @@ public class startUpClass extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("feature","IN ON RECIEVE");
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             FeatureCollectionService collectService = new FeatureCollectionService(context);
             collectService.startCollection();
-            Intent i = new Intent(context, MainActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            //context.startActivity(i);
         }
     }
 
