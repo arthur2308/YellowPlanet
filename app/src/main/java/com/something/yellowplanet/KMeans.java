@@ -24,14 +24,14 @@ public class KMeans {
         this.points = new ArrayList();
         this.clusters = new ArrayList();
     }
-
+    /**
     public static void main(String [] args)
     {
         KMeans kmeans = new KMeans();
         kmeans.init();
         kmeans.calculate();
     }
-
+    **/
     public void init() {
         points = Point.createRandomPoints(MIN_COORDINATE,MAX_COORDINATE,NUM_CLUSTERS);
 
