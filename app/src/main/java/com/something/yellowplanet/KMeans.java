@@ -1,5 +1,8 @@
 package com.something.yellowplanet;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,8 @@ public class KMeans {
         kmeans.calculate();
     }
     **/
+
+
     public void init() {
         points = Point.createRandomPoints(MIN_COORDINATE,MAX_COORDINATE,NUM_CLUSTERS);
 
@@ -152,5 +157,27 @@ public class KMeans {
                 centroid.setY(newY);
             }
         }
+    }
+
+    /**
+     * Method to get a list of points from the database to be used in k-means algorithm.
+     *
+     * @param stor The storage to get the points from
+     * @return An ArrayList containing all points for this calculation
+     *
+     */
+    public ArrayList<ArrayList<Point>> getPointsFromDB(Storage.StorageHelper stor, int time_slice) {
+        SQLiteDatabase db = stor.getReadableDatabase();
+        ArrayList<Point> p1 = new ArrayList<Point>();
+        ArrayList<Point> p2 = new ArrayList<Point>();
+        ArrayList<Point> p3 = new ArrayList<Point>();
+        ArrayList<ArrayList<Point>> tmp = new ArrayList<ArrayList<Point>>(3);
+        Cursor c = db.query("rawData",null,"COL_TIMESLICE="+time_slice,null,null,null,null);
+
+        while(!c.isLast()) {
+
+
+        }
+
     }
 }
