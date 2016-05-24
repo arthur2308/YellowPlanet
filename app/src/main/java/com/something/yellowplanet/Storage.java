@@ -13,9 +13,9 @@ public final class Storage {
     public Storage() {}
 
     public static abstract class DataEntry implements BaseColumns {
-        public static final String TABLE_NAME = "entry";
-        public static final String COL_ENTRYID = "entryid";
+        public static final String TABLE_NAME = "rawData";
         public static final String COL_TIMESTAMP = "timestamp";
+        public static final String COL_TIMESLICE = "timeslice";
         public static final String COL_BATTERY = "battery";
         public static final String COL_CPU = "cpu";
         public static final String COL_NETIN = "netin";
@@ -32,8 +32,8 @@ public final class Storage {
         private static final String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + DataEntry.TABLE_NAME + " ("
                         + DataEntry._ID + "INTEGER PRIMARY KEY,"
-                        + DataEntry.COL_ENTRYID + INT_TYPE + COMMA_SEP
                         + DataEntry.COL_TIMESTAMP + INT_TYPE + COMMA_SEP
+                        + DataEntry.COL_TIMESLICE + INT_TYPE + COMMA_SEP
                         + DataEntry.COL_BATTERY + REAL_TYPE + COMMA_SEP
                         + DataEntry.COL_CPU + REAL_TYPE + COMMA_SEP
                         + DataEntry.COL_MEMORY + REAL_TYPE + COMMA_SEP

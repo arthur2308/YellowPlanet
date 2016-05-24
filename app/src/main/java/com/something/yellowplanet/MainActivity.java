@@ -1,5 +1,6 @@
 package com.something.yellowplanet;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -42,15 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
         Storage enclosing = new Storage();
         mainStorage = enclosing.new StorageHelper(getBaseContext());
-        averages = enclosing.new StorageHelper(getBaseContext());
+
 
         KMeans kmeans = new KMeans();
         kmeans.init();
         kmeans.calculate();
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
     }
 
     @Override
